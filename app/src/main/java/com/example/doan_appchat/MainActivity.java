@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     private void sendUserToLoginActivity() {
-        Intent loginintent=new Intent(MainActivity.this,RegisterActivity.class);
+        Intent loginintent=new Intent(MainActivity.this,LoginActivity.class);
         loginintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginintent);
         finish();
