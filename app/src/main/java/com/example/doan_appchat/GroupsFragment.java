@@ -25,10 +25,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class GroupsFragment extends Fragment {
+
+
 
     private View groupfragmenview;
     private ListView listView;
@@ -46,48 +45,45 @@ public class GroupsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         groupfragmenview=inflater.inflate(R.layout.fragment_groups, container, false);
-
         listView=groupfragmenview.findViewById(R.id.list_view);
         arrayAdapter=new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1,list_of_groups);
         listView.setAdapter(arrayAdapter);
 
-//        databaseReference= FirebaseDatabase.getInstance().getReference().child("Groups");
-//        RetrieveAndDisplay();
-//
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                String currentgroupname=parent.getItemAtPosition(position).toString();
-//
-//                Intent groupchatintent=new Intent(getContext(),GroupChatActivity.class);
-//                groupchatintent.putExtra("groupname",currentgroupname);
-//                startActivity(groupchatintent);
-//            }
-//        });
-//
+        databaseReference= FirebaseDatabase.getInstance().getReference().child("Groups");
+        RetrieveAndDisplay();
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String currentgroupname=parent.getItemAtPosition(position).toString();
+
+                Intent groupchatintent=new Intent(getContext(),GroupChatActivity.class);
+                groupchatintent.putExtra("groupname",currentgroupname);
+                startActivity(groupchatintent);
+            }
+        });
         return groupfragmenview;
+
     }
+    private void RetrieveAndDisplay() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Set<String> set=new HashSet<>();
+                Iterator iterator=dataSnapshot.getChildren().iterator();
+                while (iterator.hasNext())
+                {
+                    set.add(((DataSnapshot)iterator.next()).getKey());
+                }
+                list_of_groups.clear();
+                list_of_groups.addAll(set);
+                arrayAdapter.notifyDataSetChanged();
+            }
 
-//    private void RetrieveAndDisplay() {
-//        databaseReference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                Set<String> set=new HashSet<>();
-//                Iterator iterator=dataSnapshot.getChildren().iterator();
-//                while (iterator.hasNext())
-//                {
-//                    set.add(((DataSnapshot)iterator.next()).getKey());
-//                }
-//                list_of_groups.clear();
-//                list_of_groups.addAll(set);
-//                arrayAdapter.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+    }
 }

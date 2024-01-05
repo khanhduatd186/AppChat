@@ -19,6 +19,11 @@
         app:showAsAction="never"
         ></item>
     <item
+        android:title="Create Group"
+        android:id="@+id/main_create_group_menu"
+        app:showAsAction="never"
+        ></item>
+    <item
         android:title="Logout"
         android:id="@+id/main_logout_menu"
         app:showAsAction="never"
