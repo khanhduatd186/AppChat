@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(friendsintent);
     }
 
+
     private void updateUserStatus(String state)
     {
         String savecurrentTime,savecurrentDate;

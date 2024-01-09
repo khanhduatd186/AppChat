@@ -20,6 +20,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
 //import com.google.firebase.iid.FirebaseInstanceId;
 
 public class LoginActivity extends AppCompatActivity {
@@ -31,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView Signup,ForgotPassword;
     private ProgressDialog progressDialog;
     private DatabaseReference userRef;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +107,7 @@ public class LoginActivity extends AppCompatActivity {
 //
 //                                            }
 //                                        });
+                                updateUserStatus("online");
                                 sendUserToMainActivity();
                                 Toast.makeText(LoginActivity.this,"Logged in Successfully...",Toast.LENGTH_SHORT).show();
                             }
@@ -118,6 +124,26 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void updateUserStatus(String state)
+    {
+        String savecurrentTime,savecurrentDate;
+        Calendar calendar=Calendar.getInstance();
+
+        SimpleDateFormat currentDate=new SimpleDateFormat("dd/MM/yyyy");
+        savecurrentDate=currentDate.format(calendar.getTime());
+
+        SimpleDateFormat currentTime=new SimpleDateFormat("hh:mm a");
+        savecurrentTime=currentTime.format(calendar.getTime());
+
+        HashMap<String,Object> hashMap=new HashMap<>();
+        hashMap.put("time",savecurrentTime);
+        hashMap.put("date",savecurrentDate);
+        hashMap.put("state",state);
+
+        currentUserId=firebaseAuth.getCurrentUser().getUid();
+        userRef.child("Users").child(currentUserId).child("userState").updateChildren(hashMap);
+
+    }
     private void sendUserToMainActivity() {
         Intent mainIntent=new Intent(LoginActivity.this,MainActivity.class);
         mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

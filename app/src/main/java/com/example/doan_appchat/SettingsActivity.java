@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,8 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -88,45 +92,104 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==1 && resultCode==RESULT_OK && data!=null)
-        {
-            Uri uriimage=data.getData();
-            CropImage.activity()
-                    .setGuidelines(CropImageView.Guidelines.ON)
-                    .setAspectRatio(1,1)
-                    .start(this);
-        }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if(requestCode==1 && resultCode==RESULT_OK && data!=null)
+//        {
+//            Uri uriimage=data.getData();
+//            CropImage.activity()
+//                    .setGuidelines(CropImageView.Guidelines.ON)
+//                    .setAspectRatio(1,1)
+//                    .start(this);
+//        }
+//
+//        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+//            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+//
+//            if(resultCode==RESULT_OK)
+//            {
+//                Uri resultUri=result.getUri();
+//                StorageReference filepath=userprofilestoragereference.child(currentUserrID+ ".jpg");
+//                filepath.putFile(resultUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                        final Task<Uri> firebaseUri = taskSnapshot.getStorage().getDownloadUrl();
+//                        firebaseUri.addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                            @Override
+//                            public void onSuccess(Uri uri) {
+//                                final String downloadUrl = uri.toString();
+//                                Refdatabase.child("Users").child(currentUserrID).child("image")
+//                                        .setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                            @Override
+//                                            public void onComplete(@NonNull Task<Void> task) {
+//                                                if(task.isSuccessful())
+//                                                {
+//                                                    Toast.makeText(SettingsActivity.this, "Image saved in database successfuly", Toast.LENGTH_SHORT).show();
+//                                                }
+//                                                else
+//                                                {
+//                                                    String message = task.getException().toString();
+//                                                    Toast.makeText(SettingsActivity.this, "Error: " + message,Toast.LENGTH_SHORT).show();
+//                                                }
+//                                            }
+//                                        });
+//                            }
+//                        });
+//                    }
+//                });
+//
+//            }
+//        }
+//    }
+@Override
+protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+    if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+        Uri uriImage = data.getData();
+        CropImage.activity()
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .setAspectRatio(1, 1)
+                .start(this);
+    }
 
-            if(resultCode==RESULT_OK)
-            {
-                Uri resultUri=result.getUri();
-                StorageReference filepath=userprofilestoragereference.child(currentUserrID+ ".jpg");
-                filepath.putFile(resultUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+    if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+        CropImage.ActivityResult result = CropImage.getActivityResult(data);
+
+        if (resultCode == RESULT_OK) {
+            Uri resultUri = result.getUri();
+
+            try {
+                // Convert the Uri to a Bitmap
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), resultUri);
+
+                // Convert the Bitmap to a byte array (JPEG format)
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] imageData = baos.toByteArray();
+
+                // Upload the byte array to Firebase Storage
+                StorageReference filepath = userprofilestoragereference.child(currentUserrID + ".jpg");
+                filepath.putBytes(imageData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        final Task<Uri> firebaseUri = taskSnapshot.getStorage().getDownloadUrl();
-                        firebaseUri.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        // Handle success
+                        filepath.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
-                                final String downloadUrl = uri.toString();
+                                // Save the image URL to the Realtime Database
+                                String downloadUrl = uri.toString();
                                 Refdatabase.child("Users").child(currentUserrID).child("image")
-                                        .setValue(downloadUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        .setValue(downloadUrl)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
-                                                if(task.isSuccessful())
-                                                {
-                                                    Toast.makeText(SettingsActivity.this, "Image saved in database successfuly", Toast.LENGTH_SHORT).show();
-                                                }
-                                                else
-                                                {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(SettingsActivity.this, "Image saved in database successfully", Toast.LENGTH_SHORT).show();
+                                                } else {
                                                     String message = task.getException().toString();
-                                                    Toast.makeText(SettingsActivity.this, "Error: " + message,Toast.LENGTH_SHORT).show();
+                                                    Toast.makeText(SettingsActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
                                                 }
                                             }
                                         });
@@ -134,10 +197,13 @@ public class SettingsActivity extends AppCompatActivity {
                         });
                     }
                 });
-
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
+}
+
 
     private void UpdateSettings() {
 

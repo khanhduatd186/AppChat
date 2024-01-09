@@ -87,13 +87,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             }
         });
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Sử dụng holder.getAdapterPosition() để lấy vị trí chính xác
+                int clickedPosition = holder.getAdapterPosition();
+
+                if (clickedPosition != RecyclerView.NO_POSITION) {
+                    Messages clickedMessage = UserMessageList.get(clickedPosition);
+
+                    // Kiểm tra loại tin nhắn là ảnh
+                    if (clickedMessage.getType().equals("image")) {
+                        Intent intent = new Intent(holder.itemView.getContext(), ImageViewActivity.class);
+                        intent.putExtra("url", clickedMessage.getMessage());
+                        holder.itemView.getContext().startActivity(intent);
+                    }
+                    // Kiểm tra loại tin nhắn là file (pdf hoặc docx)
+                    else if (clickedMessage.getType().equals("pdf") || clickedMessage.getType().equals("docx")) {
+                        // Thực hiện mở file ở đây
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedMessage.getMessage()));
+                        holder.itemView.getContext().startActivity(intent);
+                    }
+                }
+            }
+        });
 
 
-//        holder.receivermessagetext.setVisibility(View.GONE);
-//        holder.receiverprofileimage.setVisibility(View.GONE);
-//        holder.sendermessagetext.setVisibility(View.GONE);
-//        holder.messageSenderPicture.setVisibility(View.GONE);
-//        holder.messageReceiverPicture.setVisibility(View.GONE);
+
+        holder.receivermessagetext.setVisibility(View.GONE);
+        holder.receiverprofileimage.setVisibility(View.GONE);
+        holder.sendermessagetext.setVisibility(View.GONE);
+        holder.messageSenderPicture.setVisibility(View.GONE);
+        holder.messageReceiverPicture.setVisibility(View.GONE);
         if(frommessagetype.equals("text"))
         {
            // holder.sendermessagetext.setTextColor("BLACK");
@@ -113,42 +138,42 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 holder.receivermessagetext.setText(messages.getMessage());
             }
         }
-//        else  if(frommessagetype.equals("image"))
-//        {
-//            if(fromuserid.equals(messagesenderid))
-//            {
-//                holder.messageSenderPicture.setVisibility(View.VISIBLE);
-//                Picasso.get().load(messages.getMessage()).into(holder.messageSenderPicture);
-//            }
-//            else
-//            {
-//
-//                holder.messageReceiverPicture.setVisibility(View.VISIBLE);
-//                holder.receiverprofileimage.setVisibility(View.VISIBLE);
-//                Picasso.get().load(messages.getMessage()).into(holder.messageReceiverPicture);
-//            }
-//        }
-//        else if(frommessagetype.equals("pdf") || frommessagetype.equals("docx"))
-//        {
-//            if(fromuserid.equals(messagesenderid))
-//            {
-//                holder.messageSenderPicture.setVisibility(View.VISIBLE);
-//                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/chatapp-9849c.appspot.com/o/Image%20Files%2Ffile.png?alt=media&token=34fb4f27-54c8-4c06-b6de-59b6b8deddd2")
-//                        .into(holder.messageSenderPicture);
-//
-//
-//            }
-//            else
-//            {
-//
-//                holder.messageReceiverPicture.setVisibility(View.VISIBLE);
-//                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/chatapp-9849c.appspot.com/o/Image%20Files%2Ffile.png?alt=media&token=34fb4f27-54c8-4c06-b6de-59b6b8deddd2")
-//                        .into(holder.messageReceiverPicture);
-//
-//                holder.receiverprofileimage.setVisibility(View.VISIBLE);
-//
-//            }
-//        }
+        else  if(frommessagetype.equals("image"))
+        {
+            if(fromuserid.equals(messagesenderid))
+            {
+                holder.messageSenderPicture.setVisibility(View.VISIBLE);
+                Picasso.get().load(messages.getMessage()).into(holder.messageSenderPicture);
+            }
+            else
+            {
+
+                holder.messageReceiverPicture.setVisibility(View.VISIBLE);
+                holder.receiverprofileimage.setVisibility(View.VISIBLE);
+                Picasso.get().load(messages.getMessage()).into(holder.messageReceiverPicture);
+            }
+        }
+        else if(frommessagetype.equals("pdf") || frommessagetype.equals("docx"))
+        {
+            if(fromuserid.equals(messagesenderid))
+            {
+                holder.messageSenderPicture.setVisibility(View.VISIBLE);
+                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/chatapp-9849c.appspot.com/o/Image%20Files%2Ffile.png?alt=media&token=34fb4f27-54c8-4c06-b6de-59b6b8deddd2")
+                        .into(holder.messageSenderPicture);
+
+
+            }
+            else
+            {
+
+                holder.messageReceiverPicture.setVisibility(View.VISIBLE);
+                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/chatapp-9849c.appspot.com/o/Image%20Files%2Ffile.png?alt=media&token=34fb4f27-54c8-4c06-b6de-59b6b8deddd2")
+                        .into(holder.messageReceiverPicture);
+
+                holder.receiverprofileimage.setVisibility(View.VISIBLE);
+
+            }
+        }
 //
 //        if(fromuserid.equals(messagesenderid))
 //        {

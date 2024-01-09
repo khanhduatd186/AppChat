@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -35,6 +36,7 @@ public class ChatsFragment extends Fragment {
     private DatabaseReference chatRef,userRef;
     private FirebaseAuth mAuth;
     private String userID;
+
 
 
     public ChatsFragment() {
@@ -93,12 +95,17 @@ public class ChatsFragment extends Fragment {
 
                                 if(state.equals("online"))
                                 {
+                                    holder.img.setVisibility(View.VISIBLE);
                                     holder.userstatus.setText("online");
+
+
                                 }
                                 else if(state.equals("offline"))
                                 {
                                     holder.userstatus.setText("Last seen: "+"\n"+date+" "+time);
+                                    holder.img.setVisibility(View.INVISIBLE);
                                 }
+
                             }
                             else
                             {
@@ -132,6 +139,7 @@ public class ChatsFragment extends Fragment {
             @Override
             public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view=LayoutInflater.from(getContext()).inflate(R.layout.users_display_layout,parent,false);
+
                 ChatViewHolder chatViewHolder=new ChatViewHolder(view);
                 return chatViewHolder;
             }
@@ -145,12 +153,14 @@ public class ChatsFragment extends Fragment {
 
         CircularImageView profile_image;
         TextView username,userstatus;
+        ImageView img;
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
 
             profile_image=itemView.findViewById(R.id.users_profile_image);
             username=itemView.findViewById(R.id.users_profile_name);
             userstatus=itemView.findViewById(R.id.users_status);
+            img =itemView.findViewById(R.id.users_online_status);
         }
     }
 }

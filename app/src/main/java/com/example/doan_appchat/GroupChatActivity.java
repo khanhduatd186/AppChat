@@ -5,6 +5,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,6 +22,11 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -24,11 +34,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class GroupChatActivity extends AppCompatActivity {
 
@@ -39,6 +55,7 @@ public class GroupChatActivity extends AppCompatActivity {
     private TextView displaytextmessage;
 
     private String currentGroupName,currentUserName,currentUserID,currentDate,currentTime;
+
     private FirebaseAuth mauth;
 
     private DatabaseReference RootRef,GroupNameRef,GroupMessageRefKey;
@@ -63,6 +80,7 @@ public class GroupChatActivity extends AppCompatActivity {
         usermessage=findViewById(R.id.input_group_messages);
         scrollView=findViewById(R.id.my_scroll_view);
         displaytextmessage=findViewById(R.id.group_chat_text_display);
+
 
         GetUserInfo();
 
@@ -114,6 +132,7 @@ public class GroupChatActivity extends AppCompatActivity {
             }
         });
     }
+
 
 
 
