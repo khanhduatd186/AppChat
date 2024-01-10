@@ -1,8 +1,10 @@
 package com.example.doan_appchat;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -65,7 +67,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final MessageViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final MessageViewHolder holder, @SuppressLint("RecyclerView") final int position) {
         String messagesenderid=mAuth.getCurrentUser().getUid();
         Messages messages=UserMessageList.get(position);
 
@@ -104,9 +106,53 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                     }
                     // Kiểm tra loại tin nhắn là file (pdf hoặc docx)
                     else if (clickedMessage.getType().equals("pdf") || clickedMessage.getType().equals("docx")) {
-                        // Thực hiện mở file ở đây
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickedMessage.getMessage()));
+                        // Thực hiện mở file trực tiếp bằng ứng dụng xem PDF mặc định
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(clickedMessage.getMessage()), "application/pdf"); // Đổi kiểu MIME nếu là docx
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        try {
+                            holder.itemView.getContext().startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            // Xử lý trường hợp không có ứng dụng xem PDF trên thiết bị
+                            Toast.makeText(holder.itemView.getContext(), "Không tìm thấy ứng dụng xem PDF.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+        });
+
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Sử dụng holder.getAdapterPosition() để lấy vị trí chính xác
+                int clickedPosition = holder.getAdapterPosition();
+
+                if (clickedPosition != RecyclerView.NO_POSITION) {
+                    Messages clickedMessage = UserMessageList.get(clickedPosition);
+
+                    // Kiểm tra loại tin nhắn là ảnh
+                    if (clickedMessage.getType().equals("image")) {
+                        Intent intent = new Intent(holder.itemView.getContext(), ImageViewActivity.class);
+                        intent.putExtra("url", clickedMessage.getMessage());
                         holder.itemView.getContext().startActivity(intent);
+                    }
+                    // Kiểm tra loại tin nhắn là file (pdf hoặc docx)
+                    else if (clickedMessage.getType().equals("pdf") || clickedMessage.getType().equals("docx")) {
+                        // Thực hiện mở file trực tiếp bằng ứng dụng xem PDF mặc định
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setDataAndType(Uri.parse(clickedMessage.getMessage()), "application/pdf"); // Đổi kiểu MIME nếu là docx
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        try {
+                            holder.itemView.getContext().startActivity(intent);
+                        } catch (ActivityNotFoundException e) {
+                            // Xử lý trường hợp không có ứng dụng xem PDF trên thiết bị
+                            Toast.makeText(holder.itemView.getContext(), "Không tìm thấy ứng dụng xem PDF.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             }
@@ -121,7 +167,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         holder.messageReceiverPicture.setVisibility(View.GONE);
         if(frommessagetype.equals("text"))
         {
-           // holder.sendermessagetext.setTextColor("BLACK");
+            // holder.sendermessagetext.setTextColor("BLACK");
             if(fromuserid.equals(messagesenderid))
             {
                 holder.sendermessagetext.setVisibility(View.VISIBLE);
@@ -162,6 +208,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                         .into(holder.messageSenderPicture);
 
 
+
             }
             else
             {
@@ -174,298 +221,320 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             }
         }
-//
-//        if(fromuserid.equals(messagesenderid))
-//        {
-//            holder.itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    if(UserMessageList.get(position).getType().equals("pdf") || UserMessageList.get(position).getType().equals("docx"))
-//                    {
-//                        CharSequence options[]=new CharSequence[]
-//                                {
-//                                        "Delete for me","Download and view content","Cancel","Delete for everyone"
-//                                };
-//
-//                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
-//                        builder.setTitle("Delete Message?");
-//                        builder.setItems(options, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                if(which==0)
-//                                {
-//                                    deleteSentMessage(position,holder);
-//
-//                                }else if(which==1)
-//                                {
-//                                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(UserMessageList.get(position).getMessage()));
-//                                    holder.itemView.getContext().startActivity(intent);
-//                                }else if(which==2)
-//                                {
-//                                    //for cancel do not do anything
-//                                }
-//                                else if(which==3)
-//                                {
-//                                    deleteMessageForEveryone(position,holder);
-//
-//                                }
-//                            }
-//                        });
-//
-//                        builder.show();
-//                    }
-//                    else if(UserMessageList.get(position).getType().equals("text") )
-//                    {
-//                        CharSequence options[]=new CharSequence[]
-//                                {
-//                                        "Delete for me","Cancel","Delete for everyone"
-//                                };
-//
-//                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
-//                        builder.setTitle("Delete Message?");
-//                        builder.setItems(options, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                if(which==0)
-//                                {
-//                                    deleteSentMessage(position,holder);
-//
-//                                }else if(which==1)
-//                                {
-//                                    //for cancel do not do anything
-//                                }else if(which==2)
-//                                {
-//                                    deleteMessageForEveryone(position,holder);
-//
-//                                }
-//
-//                            }
-//                        });
-//
-//                        builder.show();
-//                    }
-//                    else  if(UserMessageList.get(position).getType().equals("image") )
-//                    {
-//                        CharSequence options[]=new CharSequence[]
-//                                {
-//                                        "Delete for me","View This Image","Cancel","Delete for everyone"
-//                                };
-//
-//                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
-//                        builder.setTitle("Delete Message?");
-//                        builder.setItems(options, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                if(which==0)
-//                                {
-//                                    deleteSentMessage(position,holder);
-//
-//                                }else if(which==1)
-//                                {
-//                                    Intent intent=new Intent(holder.itemView.getContext(),ImageViewActivity.class);
-//                                    intent.putExtra("url",UserMessageList.get(position).getMessage());
-//                                    holder.itemView.getContext().startActivity(intent);
-//
-//                                }else if(which==2)
-//                                {
-//                                    //for cancel do not do anything
-//                                }
-//                                else if(which==3)
-//                                {
-//                                    deleteMessageForEveryone(position,holder);
-//
-//                                }
-//                            }
-//                        });
-//
-//                        builder.show();
-//                    }
-//                }
-//            });
-//        }
-//        else
-//        {
-//            holder.itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    if(UserMessageList.get(position).getType().equals("pdf") || UserMessageList.get(position).getType().equals("docx"))
-//                    {
-//                        CharSequence options[]=new CharSequence[]
-//                                {
-//                                        "Delete for me","Download and view content","Cancel"
-//                                };
-//
-//                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
-//                        builder.setTitle("Delete Message?");
-//                        builder.setItems(options, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                if(which==0)
-//                                {
-//                                    deleteReceiveMessage(position,holder);
-//
-//                                }else if(which==1)
-//                                {
-//                                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(UserMessageList.get(position).getMessage()));
-//                                    holder.itemView.getContext().startActivity(intent);
-//                                }else if(which==2)
-//                                {
-//                                    //for cancel do not do anything
-//                                }
-//
-//                            }
-//                        });
-//
-//                        builder.show();
-//                    }
-//                    else if(UserMessageList.get(position).getType().equals("text") )
-//                    {
-//                        CharSequence options[]=new CharSequence[]
-//                                {
-//                                        "Delete for me","Cancel"
-//                                };
-//
-//                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
-//                        builder.setTitle("Delete Message?");
-//                        builder.setItems(options, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                if(which==0)
-//                                {
-//                                    deleteReceiveMessage(position,holder);
-//
-//                                }else if(which==1)
-//                                {
-//                                    //for cancel do not do anything
-//                                }
-//
-//                            }
-//                        });
-//
-//                        builder.show();
-//                    }
-//                    else  if(UserMessageList.get(position).getType().equals("image") )
-//                    {
-//                        CharSequence options[]=new CharSequence[]
-//                                {
-//                                        "Delete for me","View This Image","Cancel"
-//                                };
-//
-//                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
-//                        builder.setTitle("Delete Message?");
-//                        builder.setItems(options, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                if(which==0)
-//                                {
-//                                    deleteReceiveMessage(position,holder);
-//
-//                                }else if(which==1)
-//                                {
-//                                    Intent intent=new Intent(holder.itemView.getContext(),ImageViewActivity.class);
-//                                    intent.putExtra("url",UserMessageList.get(position).getMessage());
-//                                    holder.itemView.getContext().startActivity(intent);
-//
-//                                }else if(which==2)
-//                                {
-//                                    //for cancel do not do anything
-//                                }
-//
-//                            }
-//                        });
-//
-//                        builder.show();
-//                    }
-//                }
-//            });
-//        }
+
+        if(fromuserid.equals(messagesenderid))
+        {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(UserMessageList.get(position).getType().equals("pdf") || UserMessageList.get(position).getType().equals("docx"))
+                    {
+                        CharSequence options[]=new CharSequence[]
+                                {
+                                        "Delete for me","Download and view content","Cancel","Delete for everyone"
+                                };
+
+                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
+                        builder.setTitle("Delete Message?");
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which==0)
+                                {
+                                    deleteSentMessage(position,holder);
+
+                                }else if(which==1)
+                                {
+                                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(UserMessageList.get(position).getMessage()));
+                                    holder.itemView.getContext().startActivity(intent);
+                                }else if(which==2)
+                                {
+                                    //for cancel do not do anything
+                                }
+                                else if(which==3)
+                                {
+                                    deleteMessageForEveryone(position,holder);
+
+                                }
+                            }
+                        });
+
+                        builder.show();
+                    }
+                    else if(UserMessageList.get(position).getType().equals("text") )
+                    {
+                        CharSequence options[]=new CharSequence[]
+                                {
+                                        "Delete for me","Cancel","Delete for everyone"
+                                };
+
+                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
+                        builder.setTitle("Delete Message?");
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which==0)
+                                {
+                                    deleteSentMessage(position,holder);
+
+                                }else if(which==1)
+                                {
+                                    //for cancel do not do anything
+                                }else if(which==2)
+                                {
+                                    deleteMessageForEveryone(position,holder);
+
+                                }
+
+                            }
+                        });
+
+                        builder.show();
+                    }
+                    else  if(UserMessageList.get(position).getType().equals("image") )
+                    {
+                        CharSequence options[]=new CharSequence[]
+                                {
+                                        "Delete for me","View This Image","Cancel","Delete for everyone"
+                                };
+
+                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
+                        builder.setTitle("Delete Message?");
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which==0)
+                                {
+                                    deleteSentMessage(position,holder);
+
+                                }else if(which==1)
+                                {
+                                    Intent intent=new Intent(holder.itemView.getContext(),ImageViewActivity.class);
+                                    intent.putExtra("url",UserMessageList.get(position).getMessage());
+                                    holder.itemView.getContext().startActivity(intent);
+
+                                }else if(which==2)
+                                {
+                                    //for cancel do not do anything
+                                }
+                                else if(which==3)
+                                {
+                                    deleteMessageForEveryone(position,holder);
+
+                                }
+                            }
+                        });
+
+                        builder.show();
+                    }
+                }
+            });
+        }
+        else
+        {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(UserMessageList.get(position).getType().equals("pdf") || UserMessageList.get(position).getType().equals("docx"))
+                    {
+                        CharSequence options[]=new CharSequence[]
+                                {
+                                        "Delete for me","Download and view content","Cancel"
+                                };
+
+                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
+                        builder.setTitle("Delete Message?");
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which==0)
+                                {
+                                    deleteReceiveMessage(position,holder);
+
+                                }else if(which==1)
+                                {
+                                    Intent intent=new Intent(Intent.ACTION_VIEW, Uri.parse(UserMessageList.get(position).getMessage()));
+                                    holder.itemView.getContext().startActivity(intent);
+                                }else if(which==2)
+                                {
+                                    //for cancel do not do anything
+                                }
+
+                            }
+                        });
+                        holder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                // Sử dụng holder.getAdapterPosition() để lấy vị trí chính xác
+                                int clickedPosition = holder.getAdapterPosition();
+
+                                if (clickedPosition != RecyclerView.NO_POSITION) {
+                                    Messages clickedMessage = UserMessageList.get(clickedPosition);
+
+                                    // Kiểm tra loại tin nhắn là ảnh
+                                    if (clickedMessage.getType().equals("image")) {
+                                        Intent intent = new Intent(holder.itemView.getContext(), ImageViewActivity.class);
+                                        intent.putExtra("url", clickedMessage.getMessage());
+                                        holder.itemView.getContext().startActivity(intent);
+                                    }
+                                    // Kiểm tra loại tin nhắn là file (pdf hoặc docx)
+                                    else if (clickedMessage.getType().equals("pdf") || clickedMessage.getType().equals("docx")) {
+                                        // Thực hiện mở file trực tiếp bằng ứng dụng xem PDF mặc định
+                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                        intent.setDataAndType(Uri.parse(clickedMessage.getMessage()), "application/pdf"); // Đổi kiểu MIME nếu là docx
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                                        try {
+                                            holder.itemView.getContext().startActivity(intent);
+                                        } catch (ActivityNotFoundException e) {
+                                            // Xử lý trường hợp không có ứng dụng xem PDF trên thiết bị
+                                            Toast.makeText(holder.itemView.getContext(), "Không tìm thấy ứng dụng xem PDF.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+
+                        builder.show();
+                    }
+                    else if(UserMessageList.get(position).getType().equals("text") )
+                    {
+                        CharSequence options[]=new CharSequence[]
+                                {
+                                        "Delete for me","Cancel"
+                                };
+
+                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
+                        builder.setTitle("Delete Message?");
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which==0)
+                                {
+                                    deleteReceiveMessage(position,holder);
+
+                                }else if(which==1)
+                                {
+                                    //for cancel do not do anything
+                                }
+
+                            }
+                        });
+
+                        builder.show();
+                    }
+                    else  if(UserMessageList.get(position).getType().equals("image") )
+                    {
+                        CharSequence options[]=new CharSequence[]
+                                {
+                                        "Delete for me","View This Image","Cancel"
+                                };
+
+                        AlertDialog.Builder builder=new AlertDialog.Builder(holder.itemView.getContext());
+                        builder.setTitle("Delete Message?");
+                        builder.setItems(options, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if(which==0)
+                                {
+                                    deleteReceiveMessage(position,holder);
+
+                                }else if(which==1)
+                                {
+                                    Intent intent=new Intent(holder.itemView.getContext(),ImageViewActivity.class);
+                                    intent.putExtra("url",UserMessageList.get(position).getMessage());
+                                    holder.itemView.getContext().startActivity(intent);
+
+                                }else if(which==2)
+                                {
+                                    //for cancel do not do anything
+                                }
+
+                            }
+                        });
+
+                        builder.show();
+                    }
+                }
+            });
+        }
     }
-//    private void deleteSentMessage(final int position,final MessageViewHolder holder)
-//    {
-//        DatabaseReference rootRef=FirebaseDatabase.getInstance().getReference();
-//        rootRef.child("Messages").child(UserMessageList.get(position).getFrom())
-//                .child(UserMessageList.get(position).getTo()).child(UserMessageList.get(position).getMessageID())
-//                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        if(task.isSuccessful())
-//                        {
-//                            notifyItemRemoved(position);
-//                            UserMessageList.remove(position);
-//                            notifyItemRangeChanged(position, UserMessageList.size());
-//                            Toast.makeText(holder.itemView.getContext(),"Message deleted...",Toast.LENGTH_SHORT).show();
-//                        }
-//                        else
-//                        {
-//                            Toast.makeText(holder.itemView.getContext(),"Error...",Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
-//
-//    }
+    private void deleteMessage(final int position, final MessageViewHolder holder, String fromUserId, String toUserId, String messageId) {
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+        rootRef.child("Messages").child(fromUserId)
+                .child(toUserId).child(messageId)
+                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            notifyItemRemoved(position);
+                            UserMessageList.remove(position);
+                            notifyItemRangeChanged(position, UserMessageList.size());
+                            Toast.makeText(holder.itemView.getContext(), "Message deleted...", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(holder.itemView.getContext(), "Error deleting message...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
 
-//    private void deleteReceiveMessage(final int position,final MessageViewHolder holder)
-//    {
-//        DatabaseReference rootRef=FirebaseDatabase.getInstance().getReference();
-//        rootRef.child("Messages").child(UserMessageList.get(position).getTo())
-//                .child(UserMessageList.get(position).getFrom()).child(UserMessageList.get(position).getMessageID())
-//                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        if(task.isSuccessful())
-//                        {
-//                            notifyItemRemoved(position);
-//                            UserMessageList.remove(position);
-//                            notifyItemRangeChanged(position, UserMessageList.size());
-//                            Toast.makeText(holder.itemView.getContext(),"Message deleted...",Toast.LENGTH_SHORT).show();
-//                        }
-//                        else
-//                        {
-//                            Toast.makeText(holder.itemView.getContext(),"Error...",Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
-//
-//    }
+    private void deleteSentMessage(final int position, final MessageViewHolder holder) {
+        String fromUserId = UserMessageList.get(position).getFrom();
+        String toUserId = UserMessageList.get(position).getTo();
+        String messageId = UserMessageList.get(position).getMessageID();
+        deleteMessage(position, holder, fromUserId, toUserId, messageId);
+    }
 
-//    private void deleteMessageForEveryone(final int position,final MessageViewHolder holder)
-//    {
-//        DatabaseReference rootRef=FirebaseDatabase.getInstance().getReference();
-//        rootRef.child("Messages").child(UserMessageList.get(position).getFrom())
-//                .child(UserMessageList.get(position).getTo()).child(UserMessageList.get(position).getMessageID())
-//                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        if(task.isSuccessful())
-//                        {
-//                            DatabaseReference rootRef=FirebaseDatabase.getInstance().getReference();
-//                            rootRef.child("Messages").child(UserMessageList.get(position).getTo())
-//                                    .child(UserMessageList.get(position).getFrom()).child(UserMessageList.get(position).getMessageID())
-//                                    .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                        @Override
-//                                        public void onComplete(@NonNull Task<Void> task) {
-//                                            if(task.isSuccessful())
-//                                            {
-//                                                notifyItemRemoved(position);
-//                                                UserMessageList.remove(position);
-//                                                notifyItemRangeChanged(position, UserMessageList.size());
-//                                                Toast.makeText(holder.itemView.getContext(),"Message deleted...",Toast.LENGTH_SHORT).show();
-//                                            }
-//                                            else
-//                                            {
-//                                                Toast.makeText(holder.itemView.getContext(),"Error...",Toast.LENGTH_SHORT).show();
-//                                            }
-//                                        }
-//                                    });
-//                        }
-//                        else
-//                        {
-//                            Toast.makeText(holder.itemView.getContext(),"Error...",Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
-//
-//    }
+    private void deleteReceiveMessage(final int position, final MessageViewHolder holder) {
+        String fromUserId = UserMessageList.get(position).getTo();
+        String toUserId = UserMessageList.get(position).getFrom();
+        String messageId = UserMessageList.get(position).getMessageID();
+        deleteMessage(position, holder, fromUserId, toUserId, messageId);
+    }
+
+
+    private void deleteMessageForEveryone(final int position, final MessageViewHolder holder) {
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+
+        String fromUserId = UserMessageList.get(position).getFrom();
+        String toUserId = UserMessageList.get(position).getTo();
+        String messageId = UserMessageList.get(position).getMessageID();
+
+        if (fromUserId != null && toUserId != null && messageId != null) {
+            rootRef.child("Messages").child(fromUserId)
+                    .child(toUserId).child(messageId)
+                    .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                rootRef.child("Messages").child(toUserId)
+                                        .child(fromUserId).child(messageId)
+                                        .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    notifyItemRemoved(position);
+                                                    UserMessageList.remove(position);
+                                                    notifyItemRangeChanged(position, UserMessageList.size());
+                                                    Toast.makeText(holder.itemView.getContext(), "Message deleted...", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(holder.itemView.getContext(), "Error deleting receiver's message...", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                            } else {
+                                Toast.makeText(holder.itemView.getContext(), "Error deleting sender's message...", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        } else {
+            // Có giá trị null, xử lý lỗi hoặc thông báo người dùng
+            Toast.makeText(holder.itemView.getContext(), "Error: Some values are null", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     public int getItemCount() {
         return UserMessageList.size();

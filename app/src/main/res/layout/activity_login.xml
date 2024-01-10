@@ -116,22 +116,7 @@
                 android:gravity="center_horizontal">
             </TextView>
 
-            <Button
-                android:id="@+id/phone_login_button"
-                android:layout_below="@id/login_using"
-                android:padding="4dp"
-                android:text="Phone"
-                android:textAllCaps="false"
-                android:textSize="24dp"
-                android:background="@drawable/buttons"
-                android:textColor="@android:color/background_light"
-                android:layout_marginTop="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/phone"
-                android:gravity="center" />
+
         </RelativeLayout>
 
 

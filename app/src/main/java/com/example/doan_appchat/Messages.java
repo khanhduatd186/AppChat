@@ -3,24 +3,36 @@ package com.example.doan_appchat;
 
 
 public class Messages {
-    private String from,message,type;
+    private String from, to, message, type, messageID;
 
+    // Constructor mặc định (có thể không cần thiết nếu không sử dụng)
     public Messages() {
     }
 
-    public Messages(String from, String message, String type)
-    {
+    // Constructor với các tham số cần thiết
+    public Messages(String from, String to, String message, String type) {
         this.from = from;
+        this.to = to;
         this.message = message;
         this.type = type;
+        this.messageID = ""; // Hoặc bạn có thể tạo một messageID ngẫu nhiên ở đây
     }
 
+    // Getter và Setter cho các trường
     public String getFrom() {
         return from;
     }
 
     public void setFrom(String from) {
-        this.from = from;
+        this.from = (from != null) ? from : "";
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public void setTo(String to) {
+        this.to = (to != null) ? to : "";
     }
 
     public String getMessage() {
@@ -28,7 +40,7 @@ public class Messages {
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        this.message = (message != null) ? message : "";
     }
 
     public String getType() {
@@ -36,7 +48,14 @@ public class Messages {
     }
 
     public void setType(String type) {
-        this.type = type;
+        this.type = (type != null) ? type : "";
+    }
+
+    public String getMessageID() {
+        return messageID;
+    }
+
+    public void setMessageID(String messageID) {
+        this.messageID = (messageID != null) ? messageID : "";
     }
 }
-

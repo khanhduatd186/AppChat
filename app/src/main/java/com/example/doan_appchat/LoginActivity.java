@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog=new ProgressDialog(this);
 
         LoginButton=findViewById(R.id.login_button);
-        PhoneLoginButton=findViewById(R.id.phone_login_button);
+        //PhoneLoginButton=findViewById(R.id.phone_login_button);
         UserEmail=findViewById(R.id.login_email);
         UserPassword=findViewById(R.id.login_password);
         Signup=findViewById(R.id.need_new_account_link);
@@ -60,13 +60,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        PhoneLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent phoneintent =new Intent(LoginActivity.this,PhoneLoginActivity.class);
-                startActivity(phoneintent);
-            }
-        });
+//        PhoneLoginButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent phoneintent =new Intent(LoginActivity.this,PhoneLoginActivity.class);
+//                startActivity(phoneintent);
+//            }
+//        });
 
         LoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
